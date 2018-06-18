@@ -1,14 +1,11 @@
-Count: 1  Time=14.34s (14s)  Lock=0.00s (0s)  Rows=4000000.0 (4000000), ishocon[ishocon]@localhost
+Count: 1  Time=16.46s (16s)  Lock=0.01s (0s)  Rows=4000000.0 (4000000), ishocon[ishocon]@localhost
   SELECT * FROM users
 
-Count: 10368  Time=0.00s (2s)  Lock=0.00s (0s)  Rows=0.5 (5206), 2users@localhost
+Count: 32588  Time=0.00s (7s)  Lock=0.00s (0s)  Rows=0.5 (16614), 2users@localhost
   #
 
-Count: 5148  Time=0.00s (1s)  Lock=0.00s (0s)  Rows=1.0 (5148), ishocon[ishocon]@localhost
+Count: 15960  Time=0.00s (4s)  Lock=0.00s (2s)  Rows=1.0 (15960), ishocon[ishocon]@localhost
   SELECT * FROM candidates WHERE id = N
-
-Count: 1  Time=0.07s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), ishocon[ishocon]@localhost
-  DELETE FROM votes
 
 Count: 30  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.9 (28), ishocon[ishocon]@localhost
   SELECT * FROM candidates WHERE name = 'S'
@@ -16,21 +13,24 @@ Count: 30  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.9 (28), ishocon[ishocon]@loc
 Count: 4  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=7.5 (30), ishocon[ishocon]@localhost
   SELECT * FROM candidates WHERE political_party = 'S'
 
+Count: 3  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), ishocon[ishocon]@localhost
+  DELETE FROM votes
+
 Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=4.0 (4), ishocon[ishocon]@localhost
   SELECT political_party FROM candidates GROUP BY political_party
 
 Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=30.0 (30), ishocon[ishocon]@localhost
   SELECT * FROM candidates
 
-Count: 5182  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
-  administrator command: Prepare
-
 Count: 2  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
   administrator command: Ping
 
-Count: 2  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
-  administrator command: Quit
-
-Count: 5182  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
+Count: 15994  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
   administrator command: Close stmt
+
+Count: 15994  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
+  administrator command: Prepare
+
+Count: 598  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
+  administrator command: Quit
 
