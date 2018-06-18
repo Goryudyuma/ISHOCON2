@@ -25,6 +25,37 @@ type PartyElectionResult struct {
 	VoteCount      int
 }
 
+var getAllPartyNameMemo []string
+var getAllPartyNameMutex sync.Mutex
+
+func getAllPartyName() (partyNames []string) {
+	if (len(getAllPartyNameMemo)) != 0 {
+		return getAllPartyNameMemo
+	}
+	getAllPartyNameMutex.Lock()
+	if (len(getAllPartyNameMemo)) != 0 {
+		return getAllPartyNameMemo
+	}
+	getAllPartyNameMutex.Unlock()
+
+	rows, err := db.Query("SELECT political_party FROM candidates GROUP BY political_party")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+		if err != nil {
+			panic(err.Error())
+		}
+		partyNames = append(partyNames, name)
+	}
+	getAllPartyNameMemo = partyNames
+	return
+}
+
 var getAllCandidateMemo []Candidate
 var getAllCandidateMutex sync.Mutex
 
@@ -69,26 +100,16 @@ func getCandidate(candidateID int) (c Candidate, err error) {
 	return
 }
 
+var getCandidateByNameMemo = sync.Map{}
+
 func getCandidateByName(name string) (c Candidate, err error) {
+	if v, ok := getCandidateByNameMemo.Load(name); ok {
+		return v.(Candidate), nil
+	}
 	row := db.QueryRow("SELECT * FROM candidates WHERE name = ?", name)
 	err = row.Scan(&c.ID, &c.Name, &c.PoliticalParty, &c.Sex)
-	return
-}
-
-func getAllPartyName() (partyNames []string) {
-	rows, err := db.Query("SELECT political_party FROM candidates GROUP BY political_party")
 	if err != nil {
-		panic(err.Error())
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var name string
-		err = rows.Scan(&name)
-		if err != nil {
-			panic(err.Error())
-		}
-		partyNames = append(partyNames, name)
+		getCandidateByNameMemo.Store(name, c)
 	}
 	return
 }
