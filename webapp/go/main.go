@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -98,8 +99,7 @@ func main() {
 			c.Redirect(http.StatusFound, "/")
 		}
 		votes := getVoteCountByCandidateID(candidateID)
-		candidateIDs := []int{candidateID}
-		keywords := getVoiceOfSupporter(candidateIDs)
+		keywords := getVoiceOfSupporterCandidate(candidateID)
 
 		r.SetHTMLTemplate(template.Must(template.ParseFiles(layout, "templates/candidate.tmpl")))
 		c.HTML(http.StatusOK, "base", gin.H{
@@ -121,11 +121,7 @@ func main() {
 		}
 
 		candidates := getCandidatesByPoliticalParty(partyName)
-		candidateIDs := []int{}
-		for _, c := range candidates {
-			candidateIDs = append(candidateIDs, c.ID)
-		}
-		keywords := getVoiceOfSupporter(candidateIDs)
+		keywords := getVoiceOfSupporterParty(partyName)
 
 		r.SetHTMLTemplate(template.Must(template.ParseFiles(layout, "templates/political_party.tmpl")))
 		c.HTML(http.StatusOK, "base", gin.H{
@@ -180,6 +176,9 @@ func main() {
 	r.GET("/initialize", func(c *gin.Context) {
 		db.Exec("DELETE FROM votes")
 
+		voteCandidateMap = sync.Map{}
+		votePoliticalPartyMap = sync.Map{}
+		voteUserMap = sync.Map{}
 		c.String(http.StatusOK, "Finish")
 	})
 

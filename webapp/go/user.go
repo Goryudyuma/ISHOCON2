@@ -14,12 +14,6 @@ type User struct {
 var userMemo map[string]User
 
 func getUser(name string, address string, myNumber string) (user User, err error) {
-	/*
-		row := db.QueryRow("SELECT * FROM users WHERE name = ? AND address = ? AND mynumber = ?",
-			name, address, myNumber)
-		err = row.Scan(&user.ID, &user.Name, &user.Address, &user.MyNumber, &user.Votes)
-		return
-	*/
 	var ok bool
 	user, ok = userMemo[myNumber]
 	if !ok || user.Name != name || user.Address != address {

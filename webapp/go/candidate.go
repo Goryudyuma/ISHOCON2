@@ -1,6 +1,9 @@
 package main
 
-import "sync"
+import (
+	"sort"
+	"sync"
+)
 
 // Candidate Model
 type Candidate struct {
@@ -17,6 +20,20 @@ type CandidateElectionResult struct {
 	PoliticalParty string
 	Sex            string
 	VoteCount      int
+}
+
+type CandidateElectionResultList []CandidateElectionResult
+
+func (l CandidateElectionResultList) Len() int {
+	return len(l)
+}
+
+func (l CandidateElectionResultList) Swap(i, j int) {
+	l[i], l[j] = l[j], l[i]
+}
+
+func (l CandidateElectionResultList) Less(i, j int) bool {
+	return (l[i].VoteCount > l[j].VoteCount)
 }
 
 // PartyElectionResult type
@@ -144,27 +161,19 @@ func getCandidatesByPoliticalParty(party string) (candidates []Candidate) {
 }
 
 func getElectionResult() (result []CandidateElectionResult) {
-	rows, err := db.Query(`
-		SELECT c.id, c.name, c.political_party, c.sex, IFNULL(v.count, 0)
-		FROM candidates AS c
-		LEFT OUTER JOIN
-	  	(SELECT candidate_id, sum(vote_count) AS count
-	  	FROM votes
-	  	GROUP BY candidate_id) AS v
-		ON c.id = v.candidate_id
-		ORDER BY v.count DESC`)
-	if err != nil {
-		panic(err.Error())
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		r := CandidateElectionResult{}
-		err = rows.Scan(&r.ID, &r.Name, &r.PoliticalParty, &r.Sex, &r.VoteCount)
-		if err != nil {
-			panic(err.Error())
+	resultx := CandidateElectionResultList{}
+	allCandidate := getAllCandidate()
+	for _, v := range allCandidate {
+		one := CandidateElectionResult{
+			ID:             v.ID,
+			Name:           v.Name,
+			PoliticalParty: v.PoliticalParty,
+			Sex:            v.Sex,
+			VoteCount:      getVoteCountByCandidateID(v.ID),
 		}
-		result = append(result, r)
+		resultx = append(resultx, one)
 	}
+	sort.Sort(resultx)
+	result = resultx
 	return
 }
