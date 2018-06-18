@@ -1,5 +1,7 @@
 package main
 
+import "sync"
+
 // Candidate Model
 type Candidate struct {
 	ID             int
@@ -23,7 +25,18 @@ type PartyElectionResult struct {
 	VoteCount      int
 }
 
+var getAllCandidateMemo []Candidate
+var getAllCandidateMutex sync.Mutex
+
 func getAllCandidate() (candidates []Candidate) {
+	if len(getAllCandidateMemo) != 0 {
+		return getAllCandidateMemo
+	}
+	getAllCandidateMutex.Lock()
+	if len(getAllCandidateMemo) != 0 {
+		return getAllCandidateMemo
+	}
+	defer getAllCandidateMutex.Unlock()
 	rows, err := db.Query("SELECT * FROM candidates")
 	if err != nil {
 		panic(err.Error())
@@ -38,12 +51,21 @@ func getAllCandidate() (candidates []Candidate) {
 		}
 		candidates = append(candidates, c)
 	}
+	getAllCandidateMemo = candidates
 	return
 }
 
+var getCandidateMemo = sync.Map{}
+
 func getCandidate(candidateID int) (c Candidate, err error) {
+	if v, ok := getCandidateMemo.Load(candidateID); ok {
+		return v.(Candidate), nil
+	}
 	row := db.QueryRow("SELECT * FROM candidates WHERE id = ?", candidateID)
 	err = row.Scan(&c.ID, &c.Name, &c.PoliticalParty, &c.Sex)
+	if err != nil {
+		getCandidateMemo.Store(candidateID, c)
+	}
 	return
 }
 
