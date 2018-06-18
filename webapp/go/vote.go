@@ -49,18 +49,19 @@ func createVote(userID int, candidateID int, keyword string, voteCount int) {
 	voteUserMap.Store(userID, userVote)
 
 	var cardidateVote voteCandidateMapType
-	if v, ok := voteCandidateMap.Load(candidateID); ok {
-		cardidateVote = v.(voteCandidateMapType)
-	} else {
-		cardidateVote = voteCandidateMapType{
-			Count:   0,
-			Content: make(map[string]int),
+	{
+		if v, ok := voteCandidateMap.Load(candidateID); ok {
+			cardidateVote = v.(voteCandidateMapType)
+		} else {
+			cardidateVote = voteCandidateMapType{
+				Count:   0,
+				Content: make(map[string]int),
+			}
 		}
+		cardidateVote.Count += voteCount
+		cardidateVote.Content[keyword] = cardidateVote.Content[keyword] + voteCount
+		voteCandidateMap.Store(candidateID, cardidateVote)
 	}
-	cardidateVote.Count += voteCount
-	cardidateVote.Content[keyword] = cardidateVote.Content[keyword] + voteCount
-	voteCandidateMap.Store(candidateID, cardidateVote)
-
 	if c, err := getCandidate(candidateID); err != nil {
 		politicalParty := c.PoliticalParty
 		var cardidateVote voteCandidateMapType
@@ -100,6 +101,12 @@ func (l List) Less(i, j int) bool {
 	}
 }
 
+func getVotesParty(partyName string) (count int) {
+	if value, ok := votePoliticalPartyMap.Load(partyName); ok {
+		count = value.(voteCandidateMapType).Count
+	}
+	return
+}
 func getVoiceOfSupporterParty(partyName string) (voices []string) {
 	if value, ok := votePoliticalPartyMap.Load(partyName); ok {
 		now := value.(voteCandidateMapType)
@@ -115,6 +122,13 @@ func getVoiceOfSupporterParty(partyName string) (voices []string) {
 			}
 			voices = append(voices, b.name)
 		}
+	}
+	return
+}
+
+func getVotesCandidate(candidateID int) (count int) {
+	if value, ok := voteCandidateMap.Load(candidateID); ok {
+		count = value.(voteCandidateMapType).Count
 	}
 	return
 }

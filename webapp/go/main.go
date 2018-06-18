@@ -119,6 +119,7 @@ func main() {
 				votes += r.VoteCount
 			}
 		}
+		//votes = getVotesParty(partyName)
 
 		candidates := getCandidatesByPoliticalParty(partyName)
 		keywords := getVoiceOfSupporterParty(partyName)
