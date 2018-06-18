@@ -11,20 +11,20 @@ type Vote struct {
 }
 
 func getVoteCountByCandidateID(candidateID int) (count int) {
-	row := db.QueryRow("SELECT COUNT(*) AS count FROM votes WHERE candidate_id = ?", candidateID)
+	row := db.QueryRow("SELECT sum(vote_count) AS count FROM votes WHERE candidate_id = ?", candidateID)
 	row.Scan(&count)
 	return
 }
 
 func getUserVotedCount(userID int) (count int) {
-	row := db.QueryRow("SELECT COUNT(*) AS count FROM votes WHERE user_id =  ?", userID)
+	row := db.QueryRow("SELECT sum(vote_count) AS count FROM votes WHERE user_id = ?", userID)
 	row.Scan(&count)
 	return
 }
 
-func createVote(userID int, candidateID int, keyword string) {
-	db.Exec("INSERT INTO votes (user_id, candidate_id, keyword) VALUES (?, ?, ?)",
-		userID, candidateID, keyword)
+func createVote(userID int, candidateID int, keyword string, voteCount int) {
+	db.Exec("INSERT INTO votes (user_id, candidate_id, keyword, vote_count) VALUES (?, ?, ?, ?)",
+		userID, candidateID, keyword, voteCount)
 }
 
 func getVoiceOfSupporter(candidateIDs []int) (voices []string) {
@@ -37,7 +37,7 @@ func getVoiceOfSupporter(candidateIDs []int) (voices []string) {
     FROM votes
     WHERE candidate_id IN (`+strings.Join(strings.Split(strings.Repeat("?", len(candidateIDs)), ""), ",")+`)
     GROUP BY keyword
-    ORDER BY COUNT(*) DESC
+    ORDER BY sum(vote_count) DESC
     LIMIT 10`, args...)
 	if err != nil {
 		return nil
