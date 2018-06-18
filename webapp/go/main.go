@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"html/template"
 	"net/http"
 	"os"
@@ -10,7 +9,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/contrib/sessions"
-	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -34,13 +32,14 @@ func main() {
 
 	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
-	r.Use(static.Serve("/css", static.LocalFile("public/css", true)))
 	layout := "templates/layout.tmpl"
 
 	// session store
 	store := sessions.NewCookieStore([]byte("mysession"))
 	store.Options(sessions.Options{HttpOnly: true})
 	r.Use(sessions.Sessions("showwin_happy", store))
+
+	userInitialize()
 
 	// GET /
 	r.GET("/", func(c *gin.Context) {
@@ -172,7 +171,6 @@ func main() {
 			createVote(user.ID, candidate.ID, c.PostForm("keyword"), voteCount)
 			message = "投票に成功しました"
 		}
-		fmt.Println(message)
 		c.HTML(http.StatusOK, "base", gin.H{
 			"candidates": candidates,
 			"message":    message,
