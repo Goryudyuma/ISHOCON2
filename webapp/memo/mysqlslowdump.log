@@ -1,10 +1,7 @@
-Count: 3894  Time=0.00s (11s)  Lock=0.00s (0s)  Rows=0.0 (0), ishocon[ishocon]@localhost
+Count: 4049  Time=0.00s (10s)  Lock=0.00s (0s)  Rows=0.0 (0), ishocon[ishocon]@localhost
   INSERT INTO votes (user_id, candidate_id, keyword, vote_count) VALUES (N, N, 'S', N)
 
-Count: 41630  Time=0.00s (7s)  Lock=0.00s (0s)  Rows=0.5 (18944), 2users@localhost
-  #
-
-Count: 854  Time=0.01s (6s)  Lock=0.00s (0s)  Rows=30.0 (25620), ishocon[ishocon]@localhost
+Count: 890  Time=0.01s (6s)  Lock=0.00s (0s)  Rows=30.0 (26700), ishocon[ishocon]@localhost
   SELECT c.id, c.name, c.political_party, c.sex, IFNULL(v.count, N)
   FROM candidates AS c
   LEFT OUTER JOIN
@@ -14,18 +11,10 @@ Count: 854  Time=0.01s (6s)  Lock=0.00s (0s)  Rows=30.0 (25620), ishocon[ishocon
   ON c.id = v.candidate_id
   ORDER BY v.count DESC
 
-Count: 5357  Time=0.00s (3s)  Lock=0.00s (0s)  Rows=0.7 (3904), ishocon[ishocon]@localhost
-  SELECT * FROM users WHERE name = 'S' AND address = 'S' AND mynumber = 'S'
+Count: 31852  Time=0.00s (5s)  Lock=0.00s (0s)  Rows=0.4 (13142), 2users@localhost
+  #
 
-Count: 28  Time=0.12s (3s)  Lock=0.00s (0s)  Rows=10.0 (280), ishocon[ishocon]@localhost
-  SELECT keyword
-  FROM votes
-  WHERE candidate_id IN (N,N,N,N,N,N,N,N,N)
-  GROUP BY keyword
-  ORDER BY sum(vote_count) DESC
-  LIMIT N
-
-Count: 210  Time=0.01s (2s)  Lock=0.00s (0s)  Rows=9.6 (2010), ishocon[ishocon]@localhost
+Count: 202  Time=0.02s (3s)  Lock=0.00s (0s)  Rows=9.2 (1860), ishocon[ishocon]@localhost
   SELECT keyword
   FROM votes
   WHERE candidate_id IN (N)
@@ -33,7 +22,18 @@ Count: 210  Time=0.01s (2s)  Lock=0.00s (0s)  Rows=9.6 (2010), ishocon[ishocon]@
   ORDER BY sum(vote_count) DESC
   LIMIT N
 
-Count: 22  Time=0.08s (1s)  Lock=0.00s (0s)  Rows=10.0 (220), ishocon[ishocon]@localhost
+Count: 24  Time=0.11s (2s)  Lock=0.00s (0s)  Rows=10.0 (240), ishocon[ishocon]@localhost
+  SELECT keyword
+  FROM votes
+  WHERE candidate_id IN (N,N,N,N,N,N,N,N,N)
+  GROUP BY keyword
+  ORDER BY sum(vote_count) DESC
+  LIMIT N
+
+Count: 5557  Time=0.00s (2s)  Lock=0.00s (0s)  Rows=0.7 (4054), ishocon[ishocon]@localhost
+  SELECT * FROM users WHERE name = 'S' AND address = 'S' AND mynumber = 'S'
+
+Count: 27  Time=0.09s (2s)  Lock=0.00s (0s)  Rows=10.0 (270), ishocon[ishocon]@localhost
   SELECT keyword
   FROM votes
   WHERE candidate_id IN (N,N,N,N,N,N,N,N)
@@ -41,21 +41,10 @@ Count: 22  Time=0.08s (1s)  Lock=0.00s (0s)  Rows=10.0 (220), ishocon[ishocon]@l
   ORDER BY sum(vote_count) DESC
   LIMIT N
 
-Count: 5357  Time=0.00s (1s)  Lock=0.00s (0s)  Rows=1.0 (5357), ishocon[ishocon]@localhost
+Count: 5557  Time=0.00s (1s)  Lock=0.00s (0s)  Rows=1.0 (5557), ishocon[ishocon]@localhost
   SELECT sum(vote_count) AS count FROM votes WHERE user_id = N
 
-Count: 5357  Time=0.00s (1s)  Lock=0.00s (0s)  Rows=1.0 (5355), ishocon[ishocon]@localhost
-  SELECT * FROM candidates WHERE name = 'S'
-
-Count: 29  Time=0.05s (1s)  Lock=0.00s (0s)  Rows=10.0 (290), ishocon[ishocon]@localhost
-  SELECT keyword
-  FROM votes
-  WHERE candidate_id IN (N,N,N,N,N,N,N)
-  GROUP BY keyword
-  ORDER BY sum(vote_count) DESC
-  LIMIT N
-
-Count: 30  Time=0.04s (1s)  Lock=0.00s (0s)  Rows=9.9 (297), ishocon[ishocon]@localhost
+Count: 38  Time=0.04s (1s)  Lock=0.00s (0s)  Rows=10.0 (379), ishocon[ishocon]@localhost
   SELECT keyword
   FROM votes
   WHERE candidate_id IN (N,N,N,N,N,N)
@@ -63,33 +52,44 @@ Count: 30  Time=0.04s (1s)  Lock=0.00s (0s)  Rows=9.9 (297), ishocon[ishocon]@lo
   ORDER BY sum(vote_count) DESC
   LIMIT N
 
-Count: 210  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (210), ishocon[ishocon]@localhost
+Count: 32  Time=0.04s (1s)  Lock=0.00s (0s)  Rows=10.0 (320), ishocon[ishocon]@localhost
+  SELECT keyword
+  FROM votes
+  WHERE candidate_id IN (N,N,N,N,N,N,N)
+  GROUP BY keyword
+  ORDER BY sum(vote_count) DESC
+  LIMIT N
+
+Count: 202  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (202), ishocon[ishocon]@localhost
   SELECT sum(vote_count) AS count FROM votes WHERE candidate_id = N
 
-Count: 109  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=7.4 (811), ishocon[ishocon]@localhost
-  SELECT * FROM candidates WHERE political_party = 'S'
-
-Count: 210  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (210), ishocon[ishocon]@localhost
+Count: 202  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (202), ishocon[ishocon]@localhost
   SELECT * FROM candidates WHERE id = N
 
 Count: 1  Time=0.02s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), ishocon[ishocon]@localhost
   DELETE FROM votes
 
-Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=30.0 (30), ishocon[ishocon]@localhost
-  SELECT * FROM candidates
+Count: 30  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.9 (28), ishocon[ishocon]@localhost
+  SELECT * FROM candidates WHERE name = 'S'
+
+Count: 4  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=7.5 (30), ishocon[ishocon]@localhost
+  SELECT * FROM candidates WHERE political_party = 'S'
 
 Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=4.0 (4), ishocon[ishocon]@localhost
   SELECT political_party FROM candidates GROUP BY political_party
 
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=30.0 (30), ishocon[ishocon]@localhost
+  SELECT * FROM candidates
+
 Count: 2  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
   administrator command: Quit
 
-Count: 20813  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
-  administrator command: Prepare
-
-Count: 20813  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
+Count: 15924  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
   administrator command: Close stmt
 
 Count: 2  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
   administrator command: Ping
+
+Count: 15924  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
+  administrator command: Prepare
 

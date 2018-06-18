@@ -36,7 +36,7 @@ func getAllPartyName() (partyNames []string) {
 	if (len(getAllPartyNameMemo)) != 0 {
 		return getAllPartyNameMemo
 	}
-	getAllPartyNameMutex.Unlock()
+	defer getAllPartyNameMutex.Unlock()
 
 	rows, err := db.Query("SELECT political_party FROM candidates GROUP BY political_party")
 	if err != nil {
@@ -102,19 +102,28 @@ func getCandidate(candidateID int) (c Candidate, err error) {
 
 var getCandidateByNameMemo = sync.Map{}
 
+type getCandidateByNameMemoType struct {
+	c   Candidate
+	err error
+}
+
 func getCandidateByName(name string) (c Candidate, err error) {
 	if v, ok := getCandidateByNameMemo.Load(name); ok {
-		return v.(Candidate), nil
+		var vC = v.(getCandidateByNameMemoType)
+		return vC.c, vC.err
 	}
 	row := db.QueryRow("SELECT * FROM candidates WHERE name = ?", name)
 	err = row.Scan(&c.ID, &c.Name, &c.PoliticalParty, &c.Sex)
-	if err != nil {
-		getCandidateByNameMemo.Store(name, c)
-	}
+	getCandidateByNameMemo.Store(name, getCandidateByNameMemoType{c, err})
 	return
 }
 
+var getCandidatesByPoliticalPartyMemo = sync.Map{}
+
 func getCandidatesByPoliticalParty(party string) (candidates []Candidate) {
+	if v, ok := getCandidatesByPoliticalPartyMemo.Load(party); ok {
+		return v.([]Candidate)
+	}
 	rows, err := db.Query("SELECT * FROM candidates WHERE political_party = ?", party)
 	if err != nil {
 		panic(err.Error())
@@ -129,6 +138,8 @@ func getCandidatesByPoliticalParty(party string) (candidates []Candidate) {
 		}
 		candidates = append(candidates, c)
 	}
+
+	getCandidatesByPoliticalPartyMemo.Store(party, candidates)
 	return
 }
 

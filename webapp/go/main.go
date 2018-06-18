@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
 	"net/http"
 	"os"
@@ -171,6 +172,7 @@ func main() {
 			createVote(user.ID, candidate.ID, c.PostForm("keyword"), voteCount)
 			message = "投票に成功しました"
 		}
+		fmt.Println(message)
 		c.HTML(http.StatusOK, "base", gin.H{
 			"candidates": candidates,
 			"message":    message,
