@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/render"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -23,6 +24,8 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
+var htmlMemo sync.Map
+
 func main() {
 	// database setting
 	user := getEnv("ISHOCON2_DB_USER", "ishocon")
@@ -31,7 +34,7 @@ func main() {
 	db, _ = sql.Open("mysql", user+":"+pass+"@/"+dbname)
 	db.SetMaxIdleConns(5)
 
-	gin.SetMode(gin.DebugMode)
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	layout := "templates/layout.tmpl"
 
@@ -44,6 +47,10 @@ func main() {
 
 	// GET /
 	r.GET("/", func(c *gin.Context) {
+		if v,ok:=htmlMemo.Load("index");ok {
+			c.Render(http.StatusOK, v.(render.Render))
+			return
+		}
 		electionResults := getElectionResult()
 
 		// 上位10人と最下位のみ表示
@@ -84,15 +91,21 @@ func main() {
 
 		funcs := template.FuncMap{"indexPlus1": func(i int) int { return i + 1 }}
 		r.SetHTMLTemplate(template.Must(template.New("main").Funcs(funcs).ParseFiles(layout, "templates/index.tmpl")))
-		c.HTML(http.StatusOK, "base", gin.H{
+		cache:=r.HTMLRender.Instance("base",gin.H{
 			"candidates": candidates,
 			"parties":    partyResults,
 			"sexRatio":   sexRatio,
-		})
+		} )
+		htmlMemo.Store("index",cache)
+		c.Render(http.StatusOK, cache)
 	})
 
 	// GET /candidates/:candidateID(int)
 	r.GET("/candidates/:candidateID", func(c *gin.Context) {
+		if v,ok:=htmlMemo.Load("candidates/"+c.Param("candidateID"));ok {
+			c.Render(http.StatusOK, v.(render.Render))
+			return
+		}
 		candidateID, _ := strconv.Atoi(c.Param("candidateID"))
 		candidate, err := getCandidate(candidateID)
 		if err != nil {
@@ -102,16 +115,22 @@ func main() {
 		keywords := getVoiceOfSupporterCandidate(candidateID)
 
 		r.SetHTMLTemplate(template.Must(template.ParseFiles(layout, "templates/candidate.tmpl")))
-		c.HTML(http.StatusOK, "base", gin.H{
+		cache:=r.HTMLRender.Instance("base",gin.H{
 			"candidate": candidate,
 			"votes":     votes,
 			"keywords":  keywords,
 		})
+		htmlMemo.Store("candidates/"+c.Param("candidateID"),cache)
+		c.Render(http.StatusOK,cache)
 	})
 
 	// GET /political_parties/:name(string)
 	r.GET("/political_parties/:name", func(c *gin.Context) {
 		partyName := c.Param("name")
+		if v,ok:=htmlMemo.Load("political_parties/"+partyName);ok {
+			c.Render(http.StatusOK, v.(render.Render))
+			return
+		}
 		var votes int
 		electionResults := getElectionResult()
 		for _, r := range electionResults {
@@ -125,12 +144,14 @@ func main() {
 		keywords := getVoiceOfSupporterParty(partyName)
 
 		r.SetHTMLTemplate(template.Must(template.ParseFiles(layout, "templates/political_party.tmpl")))
-		c.HTML(http.StatusOK, "base", gin.H{
+		cache:=r.HTMLRender.Instance("base", gin.H{
 			"politicalParty": partyName,
 			"votes":          votes,
 			"candidates":     candidates,
 			"keywords":       keywords,
 		})
+		htmlMemo.Store("political_parties/"+partyName, cache)
+		c.Render(http.StatusOK, cache)
 	})
 
 	// GET /vote
@@ -165,9 +186,10 @@ func main() {
 		} else if c.PostForm("keyword") == "" {
 			message = "投票理由を記入してください"
 		} else {
-			createVote(user.ID, candidate.ID, c.PostForm("keyword"), voteCount)
+			go createVote(user.ID, candidate.ID, c.PostForm("keyword"), voteCount)
 			message = "投票に成功しました"
 		}
+		htmlMemo=sync.Map{}
 		c.HTML(http.StatusOK, "base", gin.H{
 			"candidates": candidates,
 			"message":    message,
@@ -180,6 +202,7 @@ func main() {
 		voteCandidateMap = sync.Map{}
 		votePoliticalPartyMap = sync.Map{}
 		voteUserMap = sync.Map{}
+		htmlMemo= sync.Map{}
 		c.String(http.StatusOK, "Finish")
 	})
 

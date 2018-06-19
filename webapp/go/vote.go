@@ -15,7 +15,7 @@ type Vote struct {
 
 type voteCandidateMapType struct {
 	Count   int
-	Content map[string]int
+	Content sync.Map
 }
 
 var voteCandidateMap sync.Map
@@ -55,11 +55,15 @@ func createVote(userID int, candidateID int, keyword string, voteCount int) {
 		} else {
 			cardidateVote = voteCandidateMapType{
 				Count:   0,
-				Content: make(map[string]int),
+				Content: sync.Map{},
 			}
 		}
 		cardidateVote.Count += voteCount
-		cardidateVote.Content[keyword] = cardidateVote.Content[keyword] + voteCount
+		vCount := 0
+		if v,ok:=cardidateVote.Content.Load(keyword);ok{
+			vCount=v.(int)
+		}
+		cardidateVote.Content.Store(keyword,vCount+voteCount)
 		voteCandidateMap.Store(candidateID, cardidateVote)
 	}
 	if c, err := getCandidate(candidateID); err != nil {
@@ -70,11 +74,15 @@ func createVote(userID int, candidateID int, keyword string, voteCount int) {
 		} else {
 			cardidateVote = voteCandidateMapType{
 				Count:   0,
-				Content: make(map[string]int),
+				Content: sync.Map{},
 			}
 		}
 		cardidateVote.Count += voteCount
-		cardidateVote.Content[keyword] = cardidateVote.Content[keyword] + voteCount
+		vCount := 0
+		if v,ok:=cardidateVote.Content.Load(keyword);ok{
+			vCount=v.(int)
+		}
+		cardidateVote.Content.Store(keyword,vCount+voteCount)
 		votePoliticalPartyMap.Store(politicalParty, cardidateVote)
 	}
 }
@@ -111,10 +119,11 @@ func getVoiceOfSupporterParty(partyName string) (voices []string) {
 	if value, ok := votePoliticalPartyMap.Load(partyName); ok {
 		now := value.(voteCandidateMapType)
 		memos := List{}
-		for k, v := range now.Content {
-			e := Entry{name: k, value: v}
+		now.Content.Range(func(k,v interface{})bool{
+			e := Entry{name: k.(string), value: v.(int)}
 			memos = append(memos, e)
-		}
+			return true
+		})
 		sort.Sort(memos)
 		for _, b := range memos {
 			if len(voices) >= 10 {
@@ -136,10 +145,11 @@ func getVoiceOfSupporterCandidate(candidateID int) (voices []string) {
 	if value, ok := voteCandidateMap.Load(candidateID); ok {
 		now := value.(voteCandidateMapType)
 		memos := List{}
-		for k, v := range now.Content {
-			e := Entry{name: k, value: v}
+		now.Content.Range(func(k,v interface{})bool{
+			e := Entry{name: k.(string), value: v.(int)}
 			memos = append(memos, e)
-		}
+			return true
+		})
 		sort.Sort(memos)
 		for _, b := range memos {
 			if len(voices) >= 10 {
