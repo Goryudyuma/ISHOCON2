@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/render"
 	_ "github.com/go-sql-driver/mysql"
@@ -37,11 +36,6 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	layout := "templates/layout.tmpl"
-
-	// session store
-	store := sessions.NewCookieStore([]byte("mysession"))
-	store.Options(sessions.Options{HttpOnly: true})
-	r.Use(sessions.Sessions("showwin_happy", store))
 
 	userInitialize()
 
@@ -206,5 +200,5 @@ func main() {
 		c.String(http.StatusOK, "Finish")
 	})
 
-	r.Run(":8080")
+	r.RunUnix("/tmp/ishocon.sock")
 }
